@@ -1,6 +1,9 @@
 package cmd
 
-import "github.com/voska/amadeus-cli/internal/errfmt"
+import (
+	"github.com/voska/amadeus-cli/internal/errfmt"
+	"github.com/voska/amadeus-cli/internal/output"
+)
 
 type ExitCodeEntry struct {
 	Code        int    `json:"code"`
@@ -9,6 +12,19 @@ type ExitCodeEntry struct {
 }
 
 type ExitCodesCmd struct{}
+
+func (c *ExitCodesCmd) Run(g *Globals) error {
+	table := ExitCodeTable()
+	entries := make([]any, len(table))
+	for i, e := range table {
+		entries[i] = map[string]any{
+			"code":        e.Code,
+			"name":        e.Name,
+			"description": e.Description,
+		}
+	}
+	return output.Write(g.Ctx, entries)
+}
 
 func ExitCodeTable() []ExitCodeEntry {
 	return []ExitCodeEntry{
