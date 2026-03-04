@@ -1,7 +1,7 @@
 name: Deploy Pages
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths: [site/**]
 permissions:
   pages: write
