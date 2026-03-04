@@ -1,7 +1,6 @@
 # amadeus — Amadeus Travel API CLI
 
-[![CI](https://github.com/voska/amadeus-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/voska/amadeus-cli/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/voska/amadeus-cli)](https://github.com/voska/amadeus-cli/releases)
+[![CI](https://github.com/voska/amadeus-cli/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/voska/amadeus-cli/actions/workflows/ci.yml)
 [![Go](https://img.shields.io/github/go-mod/go-version/voska/amadeus-cli)](https://go.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
