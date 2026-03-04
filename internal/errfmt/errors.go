@@ -36,10 +36,10 @@ func Wrap(code int, msg string, err error) *Error {
 	return &Error{Code: code, Message: msg, Detail: err.Error()}
 }
 
-func Auth(msg string) *Error     { return New(ExitAuth, msg) }
-func NotFound(msg string) *Error { return New(ExitNotFound, msg) }
-func Usage(msg string) *Error    { return New(ExitUsage, msg) }
-func Empty() *Error              { return New(ExitEmpty, "no results") }
-func Config(msg string) *Error   { return New(ExitConfig, msg) }
-func RateLimit() *Error          { return New(ExitRateLimit, "rate limited") }
+func Auth(msg string) *Error      { return New(ExitAuth, msg) }
+func NotFound(msg string) *Error  { return New(ExitNotFound, msg) }
+func Usage(msg string) *Error     { return New(ExitUsage, msg) }
+func Empty() *Error               { return New(ExitEmpty, "no results") }
+func Config(msg string) *Error    { return New(ExitConfig, msg) }
+func RateLimit() *Error           { return New(ExitRateLimit, "rate limited") }
 func Forbidden(msg string) *Error { return New(ExitForbidden, msg) }

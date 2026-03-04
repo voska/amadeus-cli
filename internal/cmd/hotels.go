@@ -85,7 +85,7 @@ type HotelsOffersCmd struct {
 
 func (c *HotelsOffersCmd) Run(g *Globals) error {
 	params := url.Values{
-		"hotelIds": {c.HotelID},
+		"hotelIds":     {c.HotelID},
 		"checkInDate":  {c.CheckIn},
 		"checkOutDate": {c.CheckOut},
 		"adults":       {strconv.Itoa(c.Adults)},
