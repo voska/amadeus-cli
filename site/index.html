@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>amadeus — Amadeus Travel API CLI for AI Agents</title>
+  <meta name="description" content="Open-source CLI for the Amadeus travel API. Search flights, hotels, airports, and airlines from your terminal. Built for AI agents with structured JSON output.">
+  <meta name="keywords" content="Amadeus CLI, Amadeus travel API, flight search CLI, hotel search CLI, AI agent tools, travel automation, airport lookup terminal">
+  <link rel="canonical" href="https://voska.github.io/amadeus-cli">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#09090b">
+  <meta name="author" content="Matt Voska">
+
+  <meta property="og:title" content="amadeus — Travel API CLI for AI Agents">
+  <meta property="og:description" content="Search flights, hotels, airports, and airlines from your terminal. Built for AI agents.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://voska.github.io/amadeus-cli">
+  <meta property="og:site_name" content="amadeus CLI">
+  <meta property="og:image" content="https://voska.github.io/amadeus-cli/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="amadeus — Travel API CLI for AI Agents">
+  <meta name="twitter:description" content="Search flights, hotels, airports, and airlines from your terminal. Built for AI agents.">
+  <meta name="twitter:image" content="https://voska.github.io/amadeus-cli/og.png">
+  <meta name="twitter:creator" content="@mattvoska">
+  <meta property="og:image:alt" content="amadeus CLI - Amadeus Travel API for AI agents, showing flight search and airport lookup in a terminal">
+
+  <link rel="icon" href="/amadeus-cli/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%2309090b'/><text x='90' y='116' text-anchor='middle' font-family='monospace' font-size='48' font-weight='700' fill='%230ea5e9'>ama</text></svg>">
+  <link rel="alternate icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2309090b'/><text x='16' y='21' text-anchor='middle' font-family='monospace' font-size='11' font-weight='700' fill='%230ea5e9'>ama</text></svg>">
+
+  <link rel="llms" href="/amadeus-cli/llms.txt" type="text/plain">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "amadeus",
+    "alternateName": "amadeus CLI",
+    "description": "An open-source command-line interface for the Amadeus travel API. amadeus lets you search flights, hotels, airports, and airlines directly from your terminal. It outputs structured JSON for AI agents, colored tables for humans, and tab-separated values for shell pipelines.",
+    "applicationCategory": "DeveloperApplication",
+    "applicationSubCategory": "Command Line Tool",
+    "operatingSystem": "macOS, Linux, Windows",
+    "softwareVersion": "0.1.0",
+    "releaseNotes": "Initial release with flights, hotels, airports, and airlines",
+    "license": "https://opensource.org/licenses/MIT",
+    "url": "https://voska.github.io/amadeus-cli",
+    "downloadUrl": "https://github.com/voska/amadeus-cli/releases",
+    "installUrl": "https://voska.github.io/amadeus-cli#install",
+    "codeRepository": "https://github.com/voska/amadeus-cli",
+    "programmingLanguage": "Go",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "voska",
+      "url": "https://github.com/voska"
+    },
+    "featureList": [
+      "Three output modes: JSON, colored tables, tab-separated values",
+      "OAuth 2.0 client credentials authentication with keyring storage",
+      "AI agent mode with structured exit codes and JSON schema introspection",
+      "Flight search with flexible date and passenger options",
+      "Hotel search by city or coordinates with offer details",
+      "Airport and airline lookup by keyword or IATA code",
+      "Field projection with --select for precise output",
+      "Dry-run mode for safe request previews",
+      "Test and production environment support"
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is amadeus CLI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "amadeus is a free, open-source command-line interface for the Amadeus travel API. It lets you search flights, hotels, airports, and airlines directly from your terminal. It supports three output modes: structured JSON for AI agents, colored tables for interactive use, and tab-separated values for shell pipelines."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I install amadeus CLI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "On macOS or Linux, install via Homebrew: brew install voska/tap/amadeus. You can also install with Go: go install github.com/voska/amadeus-cli/cmd/amadeus@latest, or download binaries from GitHub Releases."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can AI agents use amadeus CLI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. amadeus is designed agent-first. It provides structured JSON output via --json, machine-readable exit codes (0-10), a --no-input flag for non-interactive use, auto-JSON when piped, and an amadeus schema command that outputs the full CLI structure for agent introspection. Install as a Claude Code skill with: npx skills add -g voska/amadeus-cli."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What travel data can I access?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "amadeus covers the Amadeus Self-Service APIs: search flight offers with flexible dates and passenger options, search hotels by city or coordinates, get hotel offers with pricing, look up airports by keyword, and look up airlines by IATA code. Both test (free, synthetic data) and production environments are supported."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['ui-monospace', 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono', 'monospace'],
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50:  '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+              950: '#082f49',
+            },
+            surface: {
+              bg:     '#09090b',
+              card:   '#111114',
+              raised: '#18181b',
+              border: '#27272a',
+              hover:  '#2e2e33',
+            },
+            muted: '#a1a1aa',
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #09090b;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .hero-gradient {
+      background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(14, 165, 233, 0.15), transparent);
+    }
+
+    .terminal {
+      background: #111114;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .terminal-bar {
+      background: #18181b;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #27272a;
+    }
+    .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+    .syn-prompt { color: #0ea5e9; }
+    .syn-cmd { color: #e4e4e7; }
+    .syn-flag { color: #a78bfa; }
+    .syn-str { color: #67e8f9; }
+    .syn-num { color: #fbbf24; }
+    .syn-dim { color: #71717a; }
+    .syn-key { color: #fb923c; }
+
+    .tab-btn.active {
+      background: #27272a;
+      color: #e4e4e7;
+    }
+
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    [data-reveal].revealed {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    [data-reveal-delay="1"].revealed { transition-delay: 0.1s; }
+    [data-reveal-delay="2"].revealed { transition-delay: 0.2s; }
+    [data-reveal-delay="3"].revealed { transition-delay: 0.3s; }
+    [data-reveal-delay="4"].revealed { transition-delay: 0.4s; }
+
+    .card-glow {
+      position: relative;
+      transition: border-color 0.3s, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-glow:hover {
+      border-color: rgba(14, 165, 233, 0.3);
+      transform: translateY(-2px);
+    }
+    .card-glow::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.06), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .card-glow:hover::before { opacity: 1; }
+
+    .copy-btn { transition: opacity 0.15s, color 0.15s; }
+    .copy-btn:hover { opacity: 1 !important; color: #e4e4e7; }
+
+    .nav-blur {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: rgba(9, 9, 11, 0.8);
+    }
+
+    .version-pill {
+      background: rgba(14, 165, 233, 0.1);
+      border: 1px solid rgba(14, 165, 233, 0.2);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 50%, #7dd3fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .cursor-blink::after {
+      content: '|';
+      animation: blink 1s step-end infinite;
+      color: #0ea5e9;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body class="text-zinc-200 antialiased">
+
+  <nav class="fixed top-0 inset-x-0 z-50 nav-blur border-b border-surface-border">
+    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+      <a href="#" class="text-lg font-bold font-mono tracking-tight">amadeus</a>
+      <div class="flex items-center gap-5 text-sm">
+        <a href="#features" class="text-muted hover:text-zinc-200 transition-colors hidden sm:block">Features</a>
+        <a href="#install" class="text-muted hover:text-zinc-200 transition-colors hidden sm:block">Install</a>
+        <a href="#credentials" class="text-muted hover:text-zinc-200 transition-colors hidden sm:block">API Access</a>
+        <a href="#quickstart" class="text-muted hover:text-zinc-200 transition-colors hidden sm:block">Quick Start</a>
+        <a href="#faq" class="text-muted hover:text-zinc-200 transition-colors hidden sm:block">FAQ</a>
+        <a href="https://github.com/voska/amadeus-cli" class="text-muted hover:text-zinc-200 transition-colors flex items-center gap-1.5">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
+          <span class="hidden sm:inline">GitHub</span>
+        </a>
+        <a href="https://github.com/voska/amadeus-cli/releases/latest" class="version-pill px-2.5 py-0.5 rounded-full text-xs font-mono text-brand-400 hover:text-brand-300 transition-colors no-underline" id="version-badge">v0.1.0</a>
+    <script>
+      fetch('https://api.github.com/repos/voska/amadeus-cli/releases/latest')
+        .then(r => r.json())
+        .then(d => { if (d.tag_name) document.getElementById('version-badge').textContent = d.tag_name; })
+        .catch(() => {});
+    </script>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero-gradient pt-28 pb-20 sm:pt-36 sm:pb-28">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <div data-reveal>
+        <p class="text-brand-400 font-mono text-sm font-medium tracking-wide uppercase mb-4">Agent-First CLI</p>
+      </div>
+      <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6" data-reveal data-reveal-delay="1">
+        <span class="gradient-text">Amadeus Travel API</span><br>
+        <span class="text-zinc-100">for your AI agent</span>
+      </h1>
+      <p class="text-lg sm:text-xl text-muted max-w-2xl mx-auto mb-10 leading-relaxed" data-reveal data-reveal-delay="2">
+        Search flights, hotels, airports, and airlines. Structured JSON for agents, colored tables for humans, TSV for pipelines. Give your agent access to travel data.
+      </p>
+
+      <div class="max-w-2xl mx-auto mb-8" data-reveal data-reveal-delay="3">
+        <div class="terminal text-left mb-5">
+          <div class="px-5 py-4">
+            <pre class="font-mono text-sm whitespace-pre-wrap leading-relaxed"><span class="syn-cmd">Install the amadeus CLI skill for Amadeus travel API access.</span>
+<span class="syn-dim">Run:</span> <span class="syn-str">npx skills add -g voska/amadeus-cli</span></pre>
+          </div>
+        </div>
+        <button onclick="copyHeroPrompt(this)" class="inline-flex items-center justify-center gap-2.5 px-8 py-3.5 bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white rounded-lg text-base font-semibold transition-all shadow-lg shadow-brand-600/20 hover:shadow-brand-500/30" id="hero-copy-btn">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+          Copy Agent Instructions
+        </button>
+        <p class="text-xs text-muted text-center mt-3">Copy and paste into Claude Code, OpenClaw, or any AI agent</p>
+      </div>
+
+      <div class="flex items-center justify-center gap-4" data-reveal data-reveal-delay="4">
+        <a href="https://github.com/voska/amadeus-cli" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-muted hover:text-zinc-200 transition-colors">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <section class="max-w-6xl mx-auto px-6 pb-24" aria-label="Terminal demo">
+    <div class="terminal" data-reveal>
+      <div class="terminal-bar">
+        <div class="terminal-dot" style="background:#f85149;"></div>
+        <div class="terminal-dot" style="background:#fbbf24;"></div>
+        <div class="terminal-dot" style="background:#0ea5e9;"></div>
+        <span class="text-xs text-muted ml-2 font-mono">zsh</span>
+      </div>
+      <div class="p-6 font-mono text-sm leading-relaxed overflow-x-auto space-y-6">
+        <div>
+          <div><span class="syn-prompt">$</span> <span class="syn-cmd">amadeus flights search</span> <span class="syn-flag">--from</span> <span class="syn-str">JFK</span> <span class="syn-flag">--to</span> <span class="syn-str">CDG</span> <span class="syn-flag">--date</span> <span class="syn-str">2026-04-15</span></div>
+          <div class="mt-2">
+            <div class="grid gap-x-6 text-xs sm:text-sm" style="grid-template-columns: auto 1fr auto auto auto;">
+              <div class="font-bold text-zinc-300 border-b border-surface-border pb-1 mb-1">ID</div>
+              <div class="font-bold text-zinc-300 border-b border-surface-border pb-1 mb-1">ROUTE</div>
+              <div class="font-bold text-zinc-300 border-b border-surface-border pb-1 mb-1">STOPS</div>
+              <div class="font-bold text-zinc-300 border-b border-surface-border pb-1 mb-1">DURATION</div>
+              <div class="font-bold text-zinc-300 border-b border-surface-border pb-1 mb-1 text-right">PRICE</div>
+              <div class="syn-dim">1</div><div class="syn-dim">JFK &rarr; CDG</div><div class="syn-dim">direct</div><div class="syn-dim">7h35m</div><div class="text-right syn-num">EUR 54.74</div>
+              <div class="syn-dim">2</div><div class="syn-dim">JFK &rarr; LHR &rarr; CDG</div><div class="syn-dim">1</div><div class="syn-dim">10h20m</div><div class="text-right syn-num">EUR 121.33</div>
+              <div class="syn-dim">3</div><div class="syn-dim">JFK &rarr; CDG</div><div class="syn-dim">direct</div><div class="syn-dim">7h50m</div><div class="text-right syn-num">EUR 189.00</div>
+            </div>
+            <div class="mt-2 text-xs syn-dim">3 offers</div>
+          </div>
+        </div>
+
+        <div>
+          <div><span class="syn-prompt">$</span> <span class="syn-cmd">amadeus airports search</span> <span class="syn-str">london</span></div>
+          <div class="mt-2">
+            <div class="grid gap-x-6 text-xs sm:text-sm" style="grid-template-columns: 1fr auto auto;">
+              <div class="font-bold text-zinc-300 border-b border-surface-border pb-1 mb-1">NAME</div>
+              <div class="font-bold text-zinc-300 border-b border-surface-border pb-1 mb-1">IATA</div>
+              <div class="font-bold text-zinc-300 border-b border-surface-border pb-1 mb-1">TYPE</div>
+              <div class="syn-dim">HEATHROW</div><div class="syn-str">LHR</div><div class="syn-dim">AIRPORT</div>
+              <div class="syn-dim">GATWICK</div><div class="syn-str">LGW</div><div class="syn-dim">AIRPORT</div>
+              <div class="syn-dim">STANSTED</div><div class="syn-str">STN</div><div class="syn-dim">AIRPORT</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div><span class="syn-prompt">$</span> <span class="syn-cmd">amadeus flights search</span> <span class="syn-flag">--from</span> <span class="syn-str">SFO</span> <span class="syn-flag">--to</span> <span class="syn-str">NRT</span> <span class="syn-flag">--date</span> <span class="syn-str">2026-05-01</span> <span class="syn-flag">--json</span> <span class="syn-dim">| jq '.[0].price'</span></div>
+          <div class="mt-2">
+            <div><span class="syn-dim">{</span> <span class="syn-key">"total"</span><span class="syn-dim">:</span> <span class="syn-str">"342.50"</span><span class="syn-dim">,</span> <span class="syn-key">"currency"</span><span class="syn-dim">:</span> <span class="syn-str">"EUR"</span> <span class="syn-dim">}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="max-w-6xl mx-auto px-6 pb-24" aria-label="Features">
+    <h2 class="text-3xl font-bold text-center mb-4" data-reveal>Built for agents, loved by humans</h2>
+    <p class="text-muted text-center mb-12 max-w-xl mx-auto" data-reveal data-reveal-delay="1">Three output modes, structured exit codes, and full Amadeus API coverage. Give your agent travel superpowers.</p>
+
+    <div class="grid md:grid-cols-3 gap-5">
+      <article class="terminal card-glow p-6" data-reveal>
+        <div class="w-10 h-10 rounded-lg bg-brand-950 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6H8l4 6 4-6h-2c0-3 2-4 2-6a4 4 0 0 0-4-4Z"/><path d="M12 18v4"/></svg>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">Agent-First Design</h3>
+        <p class="text-muted text-sm leading-relaxed">Structured exit codes (0-10), <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--no-input</code> mode, <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">amadeus schema</code> for JSON introspection. Auto-JSON when piped. Built for Claude Code and LLM agents.</p>
+      </article>
+
+      <article class="terminal card-glow p-6" data-reveal data-reveal-delay="1">
+        <div class="w-10 h-10 rounded-lg bg-brand-950 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">JSON / Table / TSV</h3>
+        <p class="text-muted text-sm leading-relaxed"><code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--json</code> for machines, colored tables for humans, <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--plain</code> for pipelines. <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--select</code> to project specific fields.</p>
+      </article>
+
+      <article class="terminal card-glow p-6" data-reveal data-reveal-delay="2">
+        <div class="w-10 h-10 rounded-lg bg-brand-950 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2Z"/></svg>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">Flight Search</h3>
+        <p class="text-muted text-sm leading-relaxed">Search one-way and round-trip flights with flexible dates, cabin classes, stops, and passenger counts. Price confirmation with <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">flights price</code>.</p>
+      </article>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5 mt-5">
+      <article class="terminal card-glow p-6" data-reveal>
+        <div class="w-10 h-10 rounded-lg bg-brand-950 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7"/><path d="M3 7l9-4 9 4"/><path d="M12 22V11"/><rect x="7" y="11" width="4" height="5" rx="1"/><rect x="13" y="11" width="4" height="5" rx="1"/></svg>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">Hotel Search & Booking</h3>
+        <p class="text-muted text-sm leading-relaxed">Search by city or coordinates, get offers with pricing, and book with guest details. <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">hotels search</code>, <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">hotels offers</code>, <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">hotels book</code>.</p>
+      </article>
+
+      <article class="terminal card-glow p-6" data-reveal data-reveal-delay="1">
+        <div class="w-10 h-10 rounded-lg bg-brand-950 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">Airports & Airlines</h3>
+        <p class="text-muted text-sm leading-relaxed">Look up airports by keyword and airlines by IATA code. Resolve codes before building flight queries. <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">airports search</code> and <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">airlines lookup</code>.</p>
+      </article>
+
+      <article class="terminal card-glow p-6" data-reveal data-reveal-delay="2">
+        <div class="w-10 h-10 rounded-lg bg-brand-950 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">Secure OAuth 2.0</h3>
+        <p class="text-muted text-sm leading-relaxed">Client credentials auth with tokens stored in your system keyring. Auto-refresh on expiry. Test and production environments.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="install" class="max-w-6xl mx-auto px-6 pb-24" aria-label="Installation">
+    <h2 class="text-3xl font-bold text-center mb-4" data-reveal>Install</h2>
+    <p class="text-muted text-center mb-10" data-reveal data-reveal-delay="1">One command. No dependencies.</p>
+
+    <div class="terminal max-w-3xl mx-auto" data-reveal data-reveal-delay="2">
+      <div class="flex border-b border-surface-border overflow-x-auto" role="tablist" aria-label="Installation methods">
+        <button onclick="switchTab('agent')" class="tab-btn active px-5 py-3 text-sm font-mono text-muted hover:text-zinc-200 transition-colors flex-shrink-0" data-tab="agent" role="tab" aria-selected="true" aria-controls="tab-agent">AI Agent</button>
+        <button onclick="switchTab('homebrew')" class="tab-btn px-5 py-3 text-sm font-mono text-muted hover:text-zinc-200 transition-colors flex-shrink-0" data-tab="homebrew" role="tab" aria-selected="false" aria-controls="tab-homebrew">Homebrew</button>
+        <button onclick="switchTab('go')" class="tab-btn px-5 py-3 text-sm font-mono text-muted hover:text-zinc-200 transition-colors flex-shrink-0" data-tab="go" role="tab" aria-selected="false" aria-controls="tab-go">Go</button>
+        <button onclick="switchTab('binary')" class="tab-btn px-5 py-3 text-sm font-mono text-muted hover:text-zinc-200 transition-colors flex-shrink-0" data-tab="binary" role="tab" aria-selected="false" aria-controls="tab-binary">Binary</button>
+      </div>
+
+      <div class="p-6">
+        <div id="tab-agent" class="tab-content" role="tabpanel">
+          <div class="flex items-start justify-between gap-4">
+            <pre class="font-mono text-sm"><span class="syn-prompt">$</span> <span class="syn-cmd">npx skills add -g voska/amadeus-cli</span></pre>
+            <button onclick="copyText('npx skills add -g voska/amadeus-cli', this)" class="copy-btn opacity-40 text-muted flex-shrink-0" title="Copy" aria-label="Copy agent install command">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            </button>
+          </div>
+          <p class="text-muted text-xs mt-3">Install as a Claude Code skill. Works with any AI agent that supports skills.</p>
+        </div>
+
+        <div id="tab-homebrew" class="tab-content hidden" role="tabpanel">
+          <div class="flex items-start justify-between gap-4">
+            <pre class="font-mono text-sm"><span class="syn-prompt">$</span> <span class="syn-cmd">brew install voska/tap/amadeus</span></pre>
+            <button onclick="copyText('brew install voska/tap/amadeus', this)" class="copy-btn opacity-40 text-muted flex-shrink-0" title="Copy" aria-label="Copy Homebrew install command">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            </button>
+          </div>
+          <p class="text-muted text-xs mt-3">macOS and Linux</p>
+        </div>
+
+        <div id="tab-go" class="tab-content hidden" role="tabpanel">
+          <div class="flex items-start justify-between gap-4">
+            <pre class="font-mono text-sm"><span class="syn-prompt">$</span> <span class="syn-cmd">go install github.com/voska/amadeus-cli/cmd/amadeus@latest</span></pre>
+            <button onclick="copyText('go install github.com/voska/amadeus-cli/cmd/amadeus@latest', this)" class="copy-btn opacity-40 text-muted flex-shrink-0" title="Copy" aria-label="Copy Go install command">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            </button>
+          </div>
+          <p class="text-muted text-xs mt-3">Requires Go 1.22+</p>
+        </div>
+
+        <div id="tab-binary" class="tab-content hidden" role="tabpanel">
+          <p class="text-sm mb-3">Download the latest binary from <a href="https://github.com/voska/amadeus-cli/releases" class="text-brand-400 hover:underline">GitHub Releases</a>.</p>
+          <pre class="font-mono text-sm"><span class="syn-prompt">$</span> <span class="syn-cmd">tar xzf amadeus_darwin_arm64.tar.gz</span>
+<span class="syn-prompt">$</span> <span class="syn-cmd">mv amadeus /usr/local/bin/</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="credentials" class="max-w-6xl mx-auto px-6 pb-24" aria-label="Getting credentials">
+    <h2 class="text-3xl font-bold text-center mb-4" data-reveal>Getting API Credentials</h2>
+    <p class="text-muted text-center mb-10 max-w-xl mx-auto" data-reveal data-reveal-delay="1">Free test environment with synthetic data. No credit card required.</p>
+
+    <div class="max-w-3xl mx-auto space-y-4">
+      <div class="terminal card-glow" data-reveal>
+        <div class="flex items-center gap-3 px-6 pt-5 pb-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-600 text-white text-xs font-bold flex-shrink-0">1</span>
+          <span class="text-sm font-medium">Sign up at <a href="https://developers.amadeus.com/" class="text-brand-400 hover:underline">developers.amadeus.com</a></span>
+        </div>
+        <div class="px-6 pb-5 text-muted text-sm leading-relaxed">
+          Create a free account. No payment info needed for the test environment.
+        </div>
+      </div>
+
+      <div class="terminal card-glow" data-reveal data-reveal-delay="1">
+        <div class="flex items-center gap-3 px-6 pt-5 pb-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-600 text-white text-xs font-bold flex-shrink-0">2</span>
+          <span class="text-sm font-medium">Create an app in the dashboard</span>
+        </div>
+        <div class="px-6 pb-5 text-muted text-sm leading-relaxed">
+          Go to <strong class="text-zinc-300">My Self-Service Workspace</strong> &rarr; <strong class="text-zinc-300">Create New App</strong>. This gives you an <strong class="text-zinc-300">API Key</strong> and <strong class="text-zinc-300">API Secret</strong>.
+        </div>
+      </div>
+
+      <div class="terminal card-glow" data-reveal data-reveal-delay="2">
+        <div class="flex items-center gap-3 px-6 pt-5 pb-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-600 text-white text-xs font-bold flex-shrink-0">3</span>
+          <span class="text-sm font-medium">Set your credentials</span>
+        </div>
+        <div class="px-6 pb-5">
+          <pre class="font-mono text-sm mt-2"><span class="syn-prompt">$</span> <span class="syn-cmd">export AMADEUS_API_KEY=</span><span class="syn-str">your_key</span>
+<span class="syn-prompt">$</span> <span class="syn-cmd">export AMADEUS_API_SECRET=</span><span class="syn-str">your_secret</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="quickstart" class="max-w-6xl mx-auto px-6 pb-24" aria-label="Quick start guide">
+    <h2 class="text-3xl font-bold text-center mb-4" data-reveal>Quick Start</h2>
+    <p class="text-muted text-center mb-10" data-reveal data-reveal-delay="1">From credentials to your first query in under a minute.</p>
+
+    <div class="max-w-3xl mx-auto space-y-4">
+      <div class="terminal card-glow" data-reveal>
+        <div class="flex items-center gap-3 px-6 pt-5 pb-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-600 text-white text-xs font-bold flex-shrink-0">1</span>
+          <span class="text-sm font-medium">Authenticate</span>
+        </div>
+        <div class="px-6 pb-5">
+          <pre class="font-mono text-sm mt-2"><span class="syn-prompt">$</span> <span class="syn-cmd">amadeus auth login</span>
+<span class="text-brand-400">Authenticated (expires in 1799s)</span></pre>
+        </div>
+      </div>
+
+      <div class="terminal card-glow" data-reveal data-reveal-delay="1">
+        <div class="flex items-center gap-3 px-6 pt-5 pb-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-600 text-white text-xs font-bold flex-shrink-0">2</span>
+          <span class="text-sm font-medium">Search flights</span>
+        </div>
+        <div class="px-6 pb-5">
+          <pre class="font-mono text-sm mt-2"><span class="syn-prompt">$</span> <span class="syn-cmd">amadeus flights search</span> <span class="syn-flag">--from</span> <span class="syn-str">JFK</span> <span class="syn-flag">--to</span> <span class="syn-str">CDG</span> <span class="syn-flag">--date</span> <span class="syn-str">2026-04-15</span></pre>
+        </div>
+      </div>
+
+      <div class="terminal card-glow" data-reveal data-reveal-delay="2">
+        <div class="flex items-center gap-3 px-6 pt-5 pb-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-600 text-white text-xs font-bold flex-shrink-0">3</span>
+          <span class="text-sm font-medium">Pipe structured JSON to your agent</span>
+        </div>
+        <div class="px-6 pb-5">
+          <pre class="font-mono text-sm mt-2"><span class="syn-prompt">$</span> <span class="syn-cmd">amadeus flights search</span> <span class="syn-flag">--from</span> <span class="syn-str">SFO</span> <span class="syn-flag">--to</span> <span class="syn-str">NRT</span> <span class="syn-flag">--date</span> <span class="syn-str">2026-05-01</span> <span class="syn-flag">--json</span> <span class="syn-flag">--results-only</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="max-w-6xl mx-auto px-6 pb-24" aria-label="Frequently asked questions">
+    <h2 class="text-3xl font-bold text-center mb-10" data-reveal>FAQ</h2>
+
+    <div class="max-w-3xl mx-auto space-y-6">
+      <details class="terminal group" data-reveal>
+        <summary class="px-6 py-4 cursor-pointer flex items-center justify-between hover:bg-surface-raised transition-colors rounded-xl">
+          <span class="font-medium">What is amadeus CLI?</span>
+          <svg class="w-5 h-5 text-muted transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="px-6 pb-5 text-muted text-sm leading-relaxed">
+          amadeus is a free, open-source command-line interface for the Amadeus travel API. It lets you search flights, hotels, airports, and airlines directly from your terminal. It supports three output modes: structured JSON for AI agents, colored tables for interactive use, and tab-separated values for shell pipelines. Written in Go with zero runtime dependencies.
+        </div>
+      </details>
+
+      <details class="terminal group" data-reveal data-reveal-delay="1">
+        <summary class="px-6 py-4 cursor-pointer flex items-center justify-between hover:bg-surface-raised transition-colors rounded-xl">
+          <span class="font-medium">How do I use this with an AI agent?</span>
+          <svg class="w-5 h-5 text-muted transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="px-6 pb-5 text-muted text-sm leading-relaxed">
+          Install as a Claude Code skill: <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">npx skills add -g voska/amadeus-cli</code>. The skill includes a full command reference and workflows. amadeus provides structured JSON via <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--json</code>, machine-readable exit codes (0-10), <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--no-input</code> for non-interactive use, and <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">amadeus schema</code> for full CLI introspection as JSON.
+        </div>
+      </details>
+
+      <details class="terminal group" data-reveal data-reveal-delay="2">
+        <summary class="px-6 py-4 cursor-pointer flex items-center justify-between hover:bg-surface-raised transition-colors rounded-xl">
+          <span class="font-medium">Is the Amadeus API free?</span>
+          <svg class="w-5 h-5 text-muted transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="px-6 pb-5 text-muted text-sm leading-relaxed">
+          The test environment is free and rate-limited with synthetic data. Sign up at <a href="https://developers.amadeus.com/" class="text-brand-400 hover:underline">developers.amadeus.com</a> to get API credentials. Production access requires a paid plan. Use <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--test</code> to target the free test environment.
+        </div>
+      </details>
+
+      <details class="terminal group" data-reveal data-reveal-delay="3">
+        <summary class="px-6 py-4 cursor-pointer flex items-center justify-between hover:bg-surface-raised transition-colors rounded-xl">
+          <span class="font-medium">What travel data can I access?</span>
+          <svg class="w-5 h-5 text-muted transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="px-6 pb-5 text-muted text-sm leading-relaxed">
+          amadeus covers the Amadeus Self-Service APIs: search flight offers with flexible dates, cabin classes, and passenger options; search hotels by city or geocoordinates; get hotel offers with pricing and availability; book hotels; look up airports by keyword; and look up airlines by IATA code. All commands support <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--dry-run</code> to preview requests.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <footer class="border-t border-surface-border">
+    <div class="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted">
+      <div class="flex items-center gap-2">
+        <span class="font-mono font-bold text-zinc-300">amadeus</span>
+        <span>&middot;</span>
+        <span>MIT License</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="https://github.com/voska/amadeus-cli" class="hover:text-zinc-200 transition-colors">GitHub</a>
+        <a href="https://x.com/mattvoska" class="hover:text-zinc-200 transition-colors">@mattvoska</a>
+        <a href="/amadeus-cli/llms.txt" class="hover:text-zinc-200 transition-colors font-mono text-xs">llms.txt</a>
+      </div>
+    </div>
+    <div class="max-w-6xl mx-auto px-6 pb-8 text-xs text-zinc-500 text-center">
+      amadeus-cli is an independent open-source project. Not affiliated with, endorsed by, or sponsored by Amadeus IT Group.
+    </div>
+  </footer>
+
+  <script type="module">
+    import { animate, inView, stagger } from 'https://cdn.jsdelivr.net/npm/motion@11/+esm';
+
+    document.querySelectorAll('[data-reveal]').forEach(el => {
+      inView(el, () => {
+        el.classList.add('revealed');
+      }, { margin: '-60px' });
+    });
+
+    const heroElements = document.querySelectorAll('.hero-gradient [data-reveal]');
+    heroElements.forEach(el => el.classList.add('revealed'));
+
+    const nav = document.querySelector('nav');
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY > 20;
+      nav.style.borderBottomColor = scrolled ? 'rgba(39,39,42,1)' : 'rgba(39,39,42,0.5)';
+    }, { passive: true });
+
+    const terminalDemo = document.querySelector('[aria-label="Terminal demo"] .terminal');
+    if (terminalDemo) {
+      inView(terminalDemo, () => {
+        const lines = terminalDemo.querySelectorAll('.space-y-6 > div');
+        lines.forEach((line, i) => {
+          animate(line, { opacity: [0, 1], y: [10, 0] }, {
+            delay: i * 0.15,
+            duration: 0.5,
+            easing: [0.16, 1, 0.3, 1]
+          });
+        });
+      }, { margin: '-40px' });
+    }
+
+    const featureGrids = document.querySelectorAll('#features .grid');
+    featureGrids.forEach(grid => {
+      inView(grid, () => {
+        const cards = grid.querySelectorAll('article');
+        animate(cards, { opacity: [0, 1], y: [20, 0] }, {
+          delay: stagger(0.1),
+          duration: 0.5,
+          easing: [0.16, 1, 0.3, 1]
+        });
+      }, { margin: '-40px' });
+    });
+  </script>
+
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('active');
+        el.setAttribute('aria-selected', 'false');
+      });
+      const panel = document.getElementById('tab-' + tab);
+      panel.classList.remove('hidden');
+      const btn = document.querySelector('[data-tab="' + tab + '"]');
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+    }
+
+    function copyHeroPrompt(btn) {
+      navigator.clipboard.writeText('Install the amadeus CLI skill for Amadeus travel API access. Run: npx skills add -g voska/amadeus-cli').then(() => {
+        const original = btn.innerHTML;
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+        setTimeout(() => { btn.innerHTML = original; }, 2000);
+      });
+    }
+
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.innerHTML;
+        btn.innerHTML = '<span class="text-brand-400 text-xs font-mono font-medium">Copied!</span>';
+        setTimeout(() => { btn.innerHTML = original; }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>

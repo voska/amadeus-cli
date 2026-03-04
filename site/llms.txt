@@ -1,0 +1,79 @@
+# amadeus — Amadeus Travel API CLI
+
+> Agent-first CLI for the Amadeus travel API. Structured output for AI agents.
+
+amadeus is a free, open-source command-line interface for the Amadeus travel API written in Go. It provides flight search, hotel search and booking, airport lookup, and airline lookup from the terminal.
+
+## Install
+
+- Homebrew (macOS/Linux): `brew install voska/tap/amadeus`
+- Go: `go install github.com/voska/amadeus-cli/cmd/amadeus@latest`
+- Binary: https://github.com/voska/amadeus-cli/releases
+- AI Agent: `npx skills add -g voska/amadeus-cli`
+
+## Output Modes
+
+- Default: colored tables with summaries on stderr
+- `--json` / `-j`: structured JSON to stdout (auto-enabled when piped with AMADEUS_AUTO_JSON=1)
+- `--plain` / `-p`: tab-separated values, no color
+- `--results-only`: strip response metadata, return data array only
+- `--select field1,field2`: project output to specific fields (dot paths supported)
+
+## Commands
+
+- `amadeus auth login|status|logout` — OAuth 2.0 client credentials authentication
+- `amadeus flights search` — Search flight offers (one-way and round-trip)
+- `amadeus flights price` — Confirm pricing for a flight offer
+- `amadeus hotels search` — Search hotels by city or geocoordinates
+- `amadeus hotels offers` — Get offers for a specific hotel
+- `amadeus hotels book` — Book a hotel offer with guest details
+- `amadeus airports search <keyword>` — Airport autocomplete search
+- `amadeus airlines lookup <code>` — Airline lookup by IATA code
+- `amadeus schema [command]` — CLI command tree as JSON for agent introspection
+- `amadeus exit-codes` — Exit code reference
+
+## Exit Codes
+
+- 0: success
+- 1: error
+- 2: usage (invalid arguments)
+- 3: empty (no results)
+- 4: auth_required
+- 5: not_found
+- 6: forbidden
+- 7: rate_limited
+- 8: retryable (transient error)
+- 10: config_error
+
+## Agent Integration
+
+amadeus is designed agent-first:
+- Structured JSON output via --json
+- Machine-readable exit codes (0-10)
+- --no-input flag for non-interactive use
+- Auto-JSON when stdout is not a TTY (AMADEUS_AUTO_JSON=1)
+- `amadeus schema` outputs full CLI structure as JSON
+- Install as Claude Code skill: `npx skills add -g voska/amadeus-cli`
+- --dry-run to preview requests without making API calls
+
+## Environments
+
+- Test (default with --test): test.api.amadeus.com — free, rate-limited, synthetic data
+- Production: api.amadeus.com — requires paid Amadeus plan
+
+## Key Flags
+
+- `--test`: target test environment
+- `--dry-run` / `-n`: show what would happen without making API calls
+- `--no-input`: never prompt, fail if confirmation needed
+- `--json` / `-j`: structured JSON output
+- `--plain` / `-p`: tab-separated output
+- `--results-only`: strip metadata envelope
+- `--select`: project specific fields
+
+## Links
+
+- Source: https://github.com/voska/amadeus-cli
+- Releases: https://github.com/voska/amadeus-cli/releases
+- Amadeus API: https://developers.amadeus.com/
+- License: MIT

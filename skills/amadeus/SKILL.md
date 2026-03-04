@@ -4,13 +4,23 @@ Agent-friendly CLI for searching flights, hotels, airports, and airlines via the
 
 ## Setup
 
-1. Get API credentials from https://developers.amadeus.com/
-2. Set environment variables:
-   ```bash
-   export AMADEUS_API_KEY=your_key
-   export AMADEUS_API_SECRET=your_secret
-   ```
-3. Authenticate: `amadeus auth login --test`
+### Getting API Credentials
+
+1. Sign up for a free account at https://developers.amadeus.com/
+2. Go to **My Self-Service Workspace** → **Create New App**
+3. Copy the **API Key** and **API Secret** from the app dashboard
+
+The test environment is free, rate-limited, and uses synthetic data. No credit card required.
+
+### Configure and Authenticate
+
+```bash
+export AMADEUS_API_KEY=your_key
+export AMADEUS_API_SECRET=your_secret
+amadeus auth login
+```
+
+If the user doesn't have credentials yet, direct them to https://developers.amadeus.com/ to sign up and create an app.
 
 ## Agent Integration
 
