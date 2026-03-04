@@ -2,7 +2,7 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev
 LDFLAGS := -s -w -X main.version=$(VERSION)
 BIN     := bin/amadeus
 
-.PHONY: build test lint clean install generate
+.PHONY: build test lint clean fmt vet install generate
 
 build:
 	CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o $(BIN) ./cmd/amadeus
@@ -12,6 +12,12 @@ test:
 
 lint:
 	golangci-lint run ./...
+
+fmt:
+	gofmt -w .
+
+vet:
+	go vet ./...
 
 clean:
 	rm -rf bin/ dist/
