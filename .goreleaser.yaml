@@ -1,8 +1,12 @@
 version: 2
+
 builds:
   - main: ./cmd/amadeus
+    binary: amadeus
     env:
       - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.version={{.Version}}
     goos:
       - linux
       - darwin
@@ -10,25 +14,38 @@ builds:
     goarch:
       - amd64
       - arm64
-    ldflags:
-      - -s -w -X main.version={{.Version}}
 
 archives:
-  - format: tar.gz
-    name_template: "amadeus_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - name_template: "amadeus_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format_overrides:
       - goos: windows
-        format: zip
+        formats:
+          - zip
 
 checksum:
-  name_template: "checksums.txt"
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^chore:"
+      - "^ci:"
 
 brews:
-  - repository:
+  - name: amadeus
+    homepage: "https://github.com/voska/amadeus-cli"
+    description: "Amadeus Travel API CLI for humans and AI agents"
+    license: "MIT"
+    repository:
       owner: voska
       name: homebrew-tap
-    name: amadeus
-    homepage: "https://github.com/voska/amadeus-cli"
-    description: "CLI for Amadeus travel APIs"
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    commit_author:
+      name: voska-bot
+      email: bot@voska.dev
     install: |
       bin.install "amadeus"
+    test: |
+      system "#{bin}/amadeus", "exit-codes", "--json"
