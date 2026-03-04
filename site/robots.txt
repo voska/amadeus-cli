@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://voska.github.io/amadeus-cli/sitemap.xml
+Sitemap: https://amadeus-cli.com/sitemap.xml
