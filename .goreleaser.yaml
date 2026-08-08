@@ -35,6 +35,7 @@ changelog:
 
 brews:
   - name: amadeus
+    directory: Formula
     homepage: "https://github.com/voska/amadeus-cli"
     description: "Amadeus Travel API CLI for humans and AI agents"
     license: "MIT"
