@@ -33,14 +33,12 @@ changelog:
       - "^chore:"
       - "^ci:"
 
-homebrew_casks:
+brews:
   - name: amadeus
-    directory: Casks
+    directory: Formula
     homepage: "https://github.com/voska/amadeus-cli"
     description: "Amadeus Travel API CLI for humans and AI agents"
     license: "MIT"
-    url:
-      verified: github.com/voska/amadeus-cli
     repository:
       owner: voska
       name: homebrew-tap
@@ -48,9 +46,7 @@ homebrew_casks:
     commit_author:
       name: voska-bot
       email: bot@voska.dev
-    hooks:
-      post:
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/amadeus"]
-          end
+    install: |
+      bin.install "amadeus"
+    test: |
+      system "#{bin}/amadeus", "exit-codes", "--json"
